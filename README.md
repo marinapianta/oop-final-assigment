@@ -4,7 +4,7 @@
 ### Nomes: Marina e Isadora
 
 ## 1. Enunciado Geral
-A ACMERobots é uma empresa que fabrica e faz locações de robôs para clientes empresariais ou individuais. Os robôs podem ser para uso doméstico, industrial ou agrícola. Este trabalho envolve o desenvolvimento de um sistema para gerenciar robôs, clientes e locações.
+A aplicacao.ACMERobots é uma empresa que fabrica e faz locações de robôs para clientes empresariais ou individuais. Os robôs podem ser para uso doméstico, industrial ou agrícola. Este trabalho envolve o desenvolvimento de um sistema para gerenciar robôs, clientes e locações.
 
 ### Classes Iniciais Definidas
 - Robô
@@ -26,16 +26,16 @@ A ACMERobots é uma empresa que fabrica e faz locações de robôs para clientes
     - Individual: 5% (>1 robô)
 
 ### Funcionalidades do Sistema
-- **Cadastrar novo robô:** Solicita e cadastra os dados de um robô. Se o id já existir, mostra mensagem de erro. Robôs mantidos em ordem crescente de id.
-- **Cadastrar novo cliente:** Solicita e cadastra os dados de um cliente. Se o código já existir, mostra mensagem de erro. Clientes mantidos em ordem crescente de código.
+- **Cadastrar novo robô:** Solicita e cadastra os src.dados de um robô. Se o id já existir, mostra mensagem de erro. Robôs mantidos em ordem crescente de id.
+- **Cadastrar novo cliente:** Solicita e cadastra os src.dados de um cliente. Se o código já existir, mostra mensagem de erro. Clientes mantidos em ordem crescente de código.
 - **Cadastrar nova locação:** Seleção de cliente e robôs para a locação. Se o número da locação já existir, mostra mensagem de erro. Nova locação é colocada em uma fila de locações pendentes.
 - **Processar locações:** Processamento automático das locações pendentes. Se todos os robôs solicitados forem locados, a locação passa para EXECUTANDO. Se algum robô não estiver disponível, a locação retorna para a fila de locações pendentes.
-- **Mostrar relatório geral:** Mostra todos os dados de robôs, clientes e locações cadastrados.
-- **Consultar todas as locações:** Mostra todos os dados das locações, incluindo dados do cliente e valor final da locação.
+- **Mostrar relatório geral:** Mostra todos os src.dados de robôs, clientes e locações cadastrados.
+- **Consultar todas as locações:** Mostra todos os src.dados das locações, incluindo src.dados do cliente e valor final da locação.
 - **Alterar situação de uma locação:** Solicita o número da locação e a nova situação.
-- **Realizar carga de dados iniciais do sistema:** Carrega os dados dos arquivos para o sistema.
-- **Salvar dados:** Salva todos os dados cadastrados no sistema em um ou mais arquivos.
-- **Carregar dados:** Carrega todos os dados de um ou mais arquivos para o sistema.
+- **Realizar carga de src.dados iniciais do sistema:** Carrega os src.dados dos arquivos para o sistema.
+- **Salvar src.dados:** Salva todos os src.dados cadastrados no sistema em um ou mais arquivos.
+- **Carregar src.dados:** Carrega todos os src.dados de um ou mais arquivos para o sistema.
 - **Finalizar sistema:** Termina a execução do sistema.
 
 ## 2. Definição do Trabalho
@@ -51,12 +51,12 @@ O objetivo do trabalho é implementar um sistema de gerenciamento de robôs, cli
 - Nota do Trabalho = 10% apresentação + 90% implementação.
 - Implementação envolve:
     - Relatório do projeto: 1 ponto.
-    - Persistência de dados em arquivos: 1 ponto.
+    - Persistência de src.dados em arquivos: 1 ponto.
     - Tratamento de exceções: 1 ponto.
     - Interface gráfica com o usuário: 1 ponto.
     - Implementação e uso de herança, polimorfismo e coleções: 1 ponto.
     - Implementação e execução do sistema conforme a descrição: 5 pontos.
-- Ponto extra: 1 ponto se o sistema ler e gravar dados em JSON ou XML.
+- Ponto extra: 1 ponto se o sistema ler e gravar src.dados em JSON ou XML.
 
 ## 4. Entrega
 - Entregar o código-fonte do sistema e o relatório do projeto.
