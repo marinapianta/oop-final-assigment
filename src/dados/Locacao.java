@@ -12,13 +12,13 @@ public class Locacao {
     private List<Robo> robos;
     private Cliente cliente;
 
-    public Locacao(int numero, Status situacao, Date dataInicio, Date dataFim) {
+    public Locacao(int numero, Status situacao, Date dataInicio, Date dataFim, Cliente cliente, List<Robo> osRobos) {
         this.numero = numero;
         this.situacao = situacao;
         this.dataInicio = dataInicio;
         this.dataFim = dataFim;
         this.robos = robos;
-        this.cliente = cliente;
+        this.cliente = this.cliente;
     }
 
     public int getNumero() {

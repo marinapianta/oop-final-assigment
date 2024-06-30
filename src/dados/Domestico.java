@@ -4,7 +4,7 @@ public class Domestico extends Robo{
     private int nivel;
 
     public Domestico(int id, String modelo, double valorDiario, int nivel) {
-        super(id, modelo, valorDiario);
+        super(id, modelo, 1, valorDiario);
         this.nivel = nivel;
     }
 

@@ -1,12 +1,22 @@
 package src.dados;
 
 public abstract class Cliente {
+    private int tipo;
     private int codigo;
     private String nome;
 
-    public Cliente(int codigo, String nome) {
+    public Cliente(int codigo, String nome, int tipo) {
         this.codigo = codigo;
         this.nome = nome;
+        this.tipo = tipo;
+    }
+
+    public int getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(int tipo) {
+        this.tipo = tipo;
     }
 
     public int getCodigo() {

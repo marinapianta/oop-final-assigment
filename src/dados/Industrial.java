@@ -4,7 +4,7 @@ public class Industrial extends Robo {
     private String setor;
 
     public Industrial(int id, String modelo, double valorDiario, String setor) {
-        super(id, modelo, valorDiario);
+        super(id, modelo,2, valorDiario);
         this.setor = setor;
     }
 
