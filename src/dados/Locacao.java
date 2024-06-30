@@ -6,9 +6,9 @@ import java.util.concurrent.TimeUnit;
 
 public class Locacao {
     private int numero;
-    Status situacao;
-    Date dataInicio;
-    Date dataFim;
+    private Status situacao;
+    private Date dataInicio;
+    private Date dataFim;
     private List<Robo> robos;
     private Cliente cliente;
 
@@ -71,18 +71,22 @@ public class Locacao {
     public void setCliente(Cliente cliente) {
         this.cliente = cliente;
     }
-
-        public double calculaValorFinal () {
-            long diffInMillies = Math.abs(dataFim.getTime() - dataInicio.getTime());
-            long dias = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-
-            double total = 0.0;
-            for (Robo robo : robos) {
-                total += robo.calculaLocacao((int) dias);
-            }
-
-            double desconto = cliente.calculaDesconto(robos.size());
-            return total * (1 - desconto);
-        }
+    public long getDias() {
+        long diffInMillies = Math.abs(dataFim.getTime() - dataInicio.getTime());
+        return TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
     }
+
+    public double calculaValorFinal() {
+        long dias = getDias();
+
+        double total = 0.0;
+        for (Robo robo : robos) {
+            total += robo.calculaLocacao((int) dias);
+        }
+
+        double desconto = cliente.calculaDesconto(robos.size());
+        return total * (1 - desconto);
+    }
+}
+
 

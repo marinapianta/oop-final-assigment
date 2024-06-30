@@ -1,7 +1,8 @@
 package src.aplicacao;
+
+import java.io.*;
 import java.util.*;
 import src.dados.*;
-
 
 public class ACMERobots {
     private List<Robo> robos;
@@ -58,20 +59,42 @@ public class ACMERobots {
             return;
         }
 
-        Locacao locacao = locacoesPendentes.poll();
-        boolean todosRobosDisponiveis = true;
+        while (!locacoesPendentes.isEmpty()) {
+            Locacao locacao = locacoesPendentes.poll();
+            List<Robo> robosAlocados = new ArrayList<>();
+            boolean allAvailable = true;
 
-        for (Robo robo : locacao.getRobos()) {
-            // Verifica se o robô está disponível (a lógica de disponibilidade deve ser implementada)
-            // Se não estiver disponível, marca todosRobosDisponiveis como false
-        }
+            for (Robo robo : locacao.getRobos()) {
+                if (robo instanceof Agricola) {
+                    Agricola agricola = (Agricola) robo;
+                    if (!"disponivel".equals(agricola.getUso())) {
+                        allAvailable = false;
+                        break;
+                    } else {
+                        robosAlocados.add(agricola);
+                    }
+                } else {
+                    robosAlocados.add(robo);
+                }
+            }
 
-        if (todosRobosDisponiveis) {
-            locacao.setSituacao(Status.EXECUTANDO);
-            System.out.println("Locação " + locacao.getNumero() + " está agora EXECUTANDO.");
-        } else {
-            locacoesPendentes.add(locacao);
-            System.out.println("Erro: Nem todos os robôs estão disponíveis. Locação " + locacao.getNumero() + " retornada para a fila de locações pendentes.");
+            if (allAvailable) {
+                for (Robo robo : robosAlocados) {
+                    if (robo instanceof Agricola) {
+                        Agricola agricola = (Agricola) robo;
+                        agricola.setUso("indisponivel");
+                    }
+                }
+                locacao.setSituacao(Status.EXECUTANDO);
+            } else {
+                for (Robo robo : robosAlocados) {
+                    if (robo instanceof Agricola) {
+                        Agricola agricola = (Agricola) robo;
+                        agricola.setUso("disponivel");
+                    }
+                }
+                locacoesPendentes.add(locacao);
+            }
         }
     }
 
@@ -96,4 +119,103 @@ public class ACMERobots {
             System.out.println(locacao);
         }
     }
+
+    public void consultarLocacoes() {
+        if (locacoes.isEmpty()) {
+            System.out.println("Erro: Não há locações cadastradas.");
+            return;
+        }
+
+        for (Locacao locacao : locacoes) {
+            System.out.println(locacao);
+            Cliente cliente = locacao.getCliente();
+            System.out.println("Cliente: " + cliente);
+
+            if (!locacao.getRobos().isEmpty()) {
+                System.out.println("Robôs alocados:");
+                for (Robo robo : locacao.getRobos()) {
+                    System.out.println(robo);
+                }
+                System.out.println("Valor final da locação: " + locacao.calculaValorFinal());
+            }
+        }
+    }
+
+    public void alterarSituacaoLocacao(int numeroLocacao, Status novaSituacao) {
+        Locacao locacao = null;
+        for (Locacao l : locacoes) {
+            if (l.getNumero() == numeroLocacao) {
+                locacao = l;
+                break;
+            }
+        }
+
+        if (locacao == null) {
+            System.out.println("Erro: Não há locação com o número indicado.");
+            return;
+        }
+
+        if (locacao.getSituacao() == Status.FINALIZADA || locacao.getSituacao() == Status.CANCELADA) {
+            System.out.println("Erro: A situação da locação não pode ser alterada.");
+            return;
+        }
+
+        locacao.setSituacao(novaSituacao);
+        System.out.println("Situação da locação alterada com sucesso.");
+    }
+
+    public void realizarCargaDeDadosIniciais(String nomeArquivo) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(nomeArquivo + ".txt"))) {
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                // Parse and load data from file
+                // Example of parsing code
+                // String[] dados = linha.split(",");
+                // Parse and add data to respective lists
+            }
+            System.out.println("Dados carregados com sucesso.");
+
+            mostrarRelatorioGeral();
+        } catch (IOException e) {
+            System.out.println("Erro: Problema na carga de dados.");
+        }
+    }
+
+    public void salvarDados(String nomeArquivo) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(nomeArquivo + ".txt"))) {
+            for (Robo robo : robos) {
+                writer.println(robo);
+            }
+            for (Cliente cliente : clientes) {
+                writer.println(cliente);
+            }
+            for (Locacao locacao : locacoes) {
+                writer.println(locacao);
+            }
+            System.out.println("Dados salvos com sucesso.");
+        } catch (IOException e) {
+            System.out.println("Erro: Problema no salvamento de dados.");
+        }
+    }
+
+    public void carregarDados(String nomeArquivo) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(nomeArquivo + ".txt"))) {
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                // Parse and load data from file
+                // Example of parsing code
+                // String[] dados = linha.split(",");
+                // Parse and add data to respective lists
+            }
+            System.out.println("Dados carregados com sucesso.");
+        } catch (IOException e) {
+            System.out.println("Erro: Problema no carregamento de dados.");
+        }
+    }
+
+    public void finalizarSistema() {
+        System.out.println("Sistema finalizado.");
+        System.exit(0);
+    }
+
 }
