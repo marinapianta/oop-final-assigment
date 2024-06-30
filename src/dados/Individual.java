@@ -4,7 +4,7 @@ public class Individual extends Cliente {
     private String cpf;
 
     public Individual(int codigo, String nome, String cpf) {
-        super(codigo, nome);
+        super(codigo, nome, 1);
         this.cpf = cpf;
     }
 

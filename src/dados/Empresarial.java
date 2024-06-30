@@ -4,7 +4,7 @@ public class Empresarial extends Cliente {
     private int ano;
 
     public Empresarial(int codigo, String nome, int ano) {
-        super(codigo, nome);
+        super(codigo, nome, 2);
         this.ano = ano;
     }
 

@@ -2,13 +2,23 @@ package src.dados;
 
 public abstract class Robo {
     private int id;
+    private int tipo;
     private String modelo;
     private double valorDiario;
 
-    public Robo(int id, String modelo, double valorDiario) {
+    public Robo(int id, String modelo, int tipo, double valorDiario) {
         this.id = id;
         this.modelo = modelo;
         this.valorDiario = valorDiario;
+        this.tipo = tipo;
+    }
+
+    public int getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(int tipo) {
+        this.tipo = tipo;
     }
 
     public int getId() {
