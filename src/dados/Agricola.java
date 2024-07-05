@@ -14,10 +14,6 @@ public class Agricola extends Robo{
         return area;
     }
 
-    public void setArea(double area) {
-        this.area = area;
-    }
-
     public String getUso() {
         return uso;
     }
@@ -31,11 +27,12 @@ public class Agricola extends Robo{
         return dias * area * 10.00;
     }
 
+    public String toCSV() {
+        return getId() + "," + getModelo() + "," + getValorDiario() + ",3," + area + "," + uso;
+    }
+
     @Override
     public String toString() {
-        return "Agricola{" +
-                "area=" + area +
-                ", uso='" + uso + '\'' +
-                "} " + super.toString();
+        return super.toString() + "\nTipo: Agricola \n" + "Área: " + area + "\n" + "Uso: " + uso;
     }
 }

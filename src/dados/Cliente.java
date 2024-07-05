@@ -15,33 +15,20 @@ public abstract class Cliente {
         return tipo;
     }
 
-    public void setTipo(int tipo) {
-        this.tipo = tipo;
-    }
-
     public int getCodigo() {
         return codigo;
-    }
-
-    public void setCodigo(int codigo) {
-        this.codigo = codigo;
     }
 
     public String getNome() {
         return nome;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
     public abstract double calculaDesconto(int qtdRobos);
+
+    public abstract String toCSV();
 
     @Override
     public String toString() {
-        return "Cliente{" +
-                "codigo=" + codigo +
-                ", nome='" + nome + '\'' +
-                '}';
+        return "Codigo: " + codigo + "\n" + "Nome:" + nome;
     }
 }

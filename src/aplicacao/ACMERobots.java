@@ -1,6 +1,10 @@
 package src.aplicacao;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import src.dados.*;
 
@@ -9,12 +13,24 @@ public class ACMERobots {
     private List<Cliente> clientes;
     private Queue<Locacao> locacoesPendentes;
     private List<Locacao> locacoes;
+    private String nomeArquivoClientes;
+    private String nomeArquivoRobos;
+    private String nomeArquivoLocacoes;
+
 
     public ACMERobots() {
         this.robos = new ArrayList<>();
         this.clientes = new ArrayList<>();
         this.locacoesPendentes = new LinkedList<>();
         this.locacoes = new ArrayList<>();
+    }
+
+    public List<Cliente> getClientes() {
+        return clientes;
+    }
+
+    public List<Robo> getRobos() {
+        return robos;
     }
 
     public void cadastrarRobo(Robo robo) {
@@ -24,6 +40,44 @@ public class ACMERobots {
                 return;
             }
         }
+
+        switch (robo.getTipo()) {
+            case 1: // Domestico
+                if (robo instanceof Domestico) {
+                    Domestico domestico = (Domestico) robo;
+                    if (domestico.getNivel() <= 0) {
+                        System.out.println("Erro: Nível inválido para robô doméstico.");
+                        return;
+                    }
+                }
+                break;
+            case 2: // Industrial
+                if (robo instanceof Industrial) {
+                    Industrial industrial = (Industrial) robo;
+                    if (industrial.getSetor() == null || industrial.getSetor().isEmpty()) {
+                        System.out.println("Erro: Setor inválido para robô industrial.");
+                        return;
+                    }
+                }
+                break;
+            case 3: // Agricola
+                if (robo instanceof Agricola) {
+                    Agricola agricola = (Agricola) robo;
+                    if (agricola.getArea() <= 0) {
+                        System.out.println("Erro: Área inválida para robô agrícola.");
+                        return;
+                    }
+                    if (agricola.getUso() == null || agricola.getUso().isEmpty()) {
+                        System.out.println("Erro: Uso inválido para robô agrícola.");
+                        return;
+                    }
+                }
+                break;
+            default:
+                System.out.println("Erro: Tipo de robô desconhecido.");
+                return;
+        }
+
         robos.add(robo);
         robos.sort(Comparator.comparingInt(Robo::getId));
         System.out.println("Robô cadastrado com sucesso!");
@@ -98,50 +152,68 @@ public class ACMERobots {
         }
     }
 
-    public void mostrarRelatorioGeral() {
+    public String mostrarRelatorioGeral() {
+        StringBuilder relatorio = new StringBuilder();
+
         if (robos.isEmpty() && clientes.isEmpty() && locacoes.isEmpty()) {
-            System.out.println("Erro: Não há dados cadastrados.");
-            return;
+            return "Erro: Não há dados cadastrados.";
         }
 
-        System.out.println("Robôs cadastrados:");
-        for (Robo robo : robos) {
-            System.out.println(robo);
+        if (!robos.isEmpty()) {
+            relatorio.append("Robôs cadastrados:\n");
+            for (Robo robo : robos) {
+                relatorio.append(robo).append("\n\n");
+            }
+        } else {
+            relatorio.append("Não há robôs cadastrados.\n");
         }
 
-        System.out.println("\nClientes cadastrados:");
-        for (Cliente cliente : clientes) {
-            System.out.println(cliente);
+        if (!clientes.isEmpty()) {
+            relatorio.append("\nClientes cadastrados:\n");
+            for (Cliente cliente : clientes) {
+                relatorio.append(cliente).append("\n\n");
+            }
+        } else {
+            relatorio.append("Não há clientes cadastrados.\n");
         }
 
-        System.out.println("\nLocações cadastradas:");
-        for (Locacao locacao : locacoes) {
-            System.out.println(locacao);
+        if (!locacoes.isEmpty()) {
+            relatorio.append("\nLocações cadastradas:\n");
+            for (Locacao locacao : locacoes) {
+                relatorio.append(locacao).append("\n\n");
+            }
+        } else {
+            relatorio.append("Não há locações cadastradas.\n");
         }
+
+        return relatorio.toString();
     }
 
-    public void consultarLocacoes() {
+    public String consultarLocacoes() {
+        StringBuilder consulta = new StringBuilder();
+
         if (locacoes.isEmpty()) {
-            System.out.println("Erro: Não há locações cadastradas.");
-            return;
+            return "Erro: Não há locações cadastradas.";
         }
 
         for (Locacao locacao : locacoes) {
-            System.out.println(locacao);
+            consulta.append(locacao).append("\n");
             Cliente cliente = locacao.getCliente();
-            System.out.println("Cliente: " + cliente);
+            consulta.append("Cliente: ").append(cliente).append("\n");
 
             if (!locacao.getRobos().isEmpty()) {
-                System.out.println("Robôs alocados:");
+                consulta.append("Robôs alocados:\n");
                 for (Robo robo : locacao.getRobos()) {
-                    System.out.println(robo);
+                    consulta.append(robo).append("\n");
                 }
-                System.out.println("Valor final da locação: " + locacao.calculaValorFinal());
+                consulta.append("Valor final da locação: ").append(locacao.calculaValorFinal()).append("\n");
             }
         }
+
+        return consulta.toString();
     }
 
-    public void alterarSituacaoLocacao(int numeroLocacao, Status novaSituacao) {
+    public void alterarSituacaoLocacao(int numeroLocacao, String novaSituacaoStr) {
         Locacao locacao = null;
         for (Locacao l : locacoes) {
             if (l.getNumero() == numeroLocacao) {
@@ -160,175 +232,142 @@ public class ACMERobots {
             return;
         }
 
-        locacao.setSituacao(novaSituacao);
-        System.out.println("Situação da locação alterada com sucesso.");
-    }
-
-    public void realizarCargaDeDadosIniciais(String nomeArquivo) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(nomeArquivo + ".txt"))) {
-            String linha;
-            while ((linha = reader.readLine()) != null) {
-                String[] dados = linha.split(",");
-                switch (dados[0]) {
-                    case "R":
-                        if (dados[1].equalsIgnoreCase("Agricola")) {
-                            Robo agricola = new Agricola(
-                                    Integer.parseInt(dados[2]),
-                                    dados[3],
-                                    Double.parseDouble(dados[4]),
-                                    Double.parseDouble(dados[5]),
-                                    dados[6]
-                            );
-                            cadastrarRobo(agricola);
-                        } else if (dados[1].equalsIgnoreCase("Domestico")) {
-                            Robo domestico = new Domestico(
-                                    Integer.parseInt(dados[2]),
-                                    dados[3],
-                                    Double.parseDouble(dados[4]),
-                                    Integer.parseInt(dados[5])
-                            );
-                            cadastrarRobo(domestico);
-                        } else if (dados[1].equalsIgnoreCase("Industrial")) {
-                            Robo industrial = new Industrial(
-                                    Integer.parseInt(dados[2]),
-                                    dados[3],
-                                    Double.parseDouble(dados[4]),
-                                    dados[5]
-                            );
-                            cadastrarRobo(industrial);
-                        }
-                        break;
-                    case "C":
-                        if (dados[1].equalsIgnoreCase("Empresarial")) {
-                            Cliente empresarial = new Empresarial(
-                                    Integer.parseInt(dados[2]),
-                                    dados[3],
-                                    Integer.parseInt(dados[4])
-                            );
-                            cadastrarCliente(empresarial);
-                        } else if (dados[1].equalsIgnoreCase("Individual")) {
-                            Cliente individual = new Individual(
-                                    Integer.parseInt(dados[2]),
-                                    dados[3],
-                                    dados[4]
-                            );
-                            cadastrarCliente(individual);
-                        }
-                        break;
-                    case "L":
-                        int numero = Integer.parseInt(dados[2]);
-                        Cliente cliente = null;
-                        for (Cliente c : clientes) {
-                            if (c.getCodigo() == Integer.parseInt(dados[3])) {
-                                cliente = c;
-                                break;
-                            }
-                        }
-                        if (cliente == null) {
-                            System.out.println("Erro: Cliente não encontrado.");
-                            continue;
-                        }
-                        Date dataInicio = new Date(Long.parseLong(dados[4]));
-                        Date dataFim = new Date(Long.parseLong(dados[5]));
-                        List<Robo> robosLocacao = new ArrayList<>();
-                        for (int i = 6; i < dados.length; i++) {
-                            int idRobo = Integer.parseInt(dados[i]);
-                            Robo robo = null;
-                            for (Robo r : robos) {
-                                if (r.getId() == idRobo) {
-                                    robo = r;
-                                    break;
-                                }
-                            }
-                            if (robo != null) {
-                                robosLocacao.add(robo);
-                            } else {
-                                System.out.println("Erro: Robô com id " + idRobo + " não encontrado.");
-                            }
-                        }
-                        Locacao locacao = new Locacao(numero, Status.CADASTRADA, dataInicio, dataFim, cliente, robos);
-                        locacao.setCliente(cliente);
-                        locacao.setRobos(robosLocacao);
-                        cadastrarLocacao(locacao);
-                        break;
-                }
-            }
-            System.out.println("Dados carregados com sucesso.");
-            mostrarRelatorioGeral();
-        } catch (IOException e) {
-            System.out.println("Erro: Problema na carga de dados.");
-            e.printStackTrace();
+        try {
+            Status novaSituacao = Status.valueOf(novaSituacaoStr.toUpperCase());
+            locacao.setSituacao(novaSituacao);
+            System.out.println("Situação da locação alterada com sucesso.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Erro: Situação inválida. Use uma das seguintes opções: " + Arrays.toString(Status.values()));
         }
     }
 
-    public void salvarDados(String nomeArquivo) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(nomeArquivo + ".txt"))) {
-            for (Robo robo : robos) {
-                if (robo instanceof Agricola) {
-                    Agricola agricola = (Agricola) robo;
-                    writer.printf("R,Agricola,%d,%s,%.2f,%.2f,%s\n",
-                            agricola.getId(), agricola.getModelo(), agricola.getValorDiario(),
-                            agricola.getArea(), agricola.getUso());
-                } else if (robo instanceof Domestico) {
-                    Domestico domestico = (Domestico) robo;
-                    writer.printf("R,Domestico,%d,%s,%.2f,%d\n",
-                            domestico.getId(), domestico.getModelo(), domestico.getValorDiario(),
-                            domestico.getNivel());
-                } else if (robo instanceof Industrial) {
-                    Industrial industrial = (Industrial) robo;
-                    writer.printf("R,Industrial,%d,%s,%.2f,%s\n",
-                            industrial.getId(), industrial.getModelo(), industrial.getValorDiario(),
-                            industrial.getSetor());
-                }
-            }
-            for (Cliente cliente : clientes) {
-                if (cliente instanceof Empresarial) {
-                    Empresarial empresarial = (Empresarial) cliente;
-                    writer.printf("C,Empresarial,%d,%s,%d\n",
-                            empresarial.getCodigo(), empresarial.getNome(), empresarial.getAno());
-                } else if (cliente instanceof Individual) {
-                    Individual individual = (Individual) cliente;
-                    writer.printf("C,Individual,%d,%s,%s\n",
-                            individual.getCodigo(), individual.getNome(), individual.getCpf());
-                }
-            }
-            for (Locacao locacao : locacoes) {
-                writer.printf("L,%d,%d,%d,%d,%d",
-                        locacao.getNumero(), locacao.getCliente().getCodigo(),
-                        locacao.getDataInicio().getTime(), locacao.getDataFim().getTime());
-                for (Robo robo : locacao.getRobos()) {
-                    writer.printf(",%d", robo.getId());
-                }
-                writer.println();
-            }
+    public void realizarCargaDeDadosIniciais() {
+        try {
+            carregarClientes();
+            carregarRobos();
+            carregarLocacoes();
+            System.out.println("Carga de dados iniciais realizada com sucesso.");
+            System.out.println(mostrarRelatorioGeral());
+        } catch (IOException | ParseException e) {
+            System.out.println("Erro ao carregar dados: " + e.getMessage());
+        }
+    }
+
+    public void salvarDados() {
+        try {
+            salvarClientes(nomeArquivoClientes);
+            salvarRobos(nomeArquivoRobos);
+            salvarLocacoes(nomeArquivoLocacoes);
             System.out.println("Dados salvos com sucesso.");
         } catch (IOException e) {
-            System.out.println("Erro: Problema no salvamento de dados.");
-            e.printStackTrace();
+            System.out.println("Erro ao salvar dados: " + e.getMessage());
         }
     }
 
-    public void carregarDados(String nomeArquivo) {
-        realizarCargaDeDadosIniciais(nomeArquivo);
+    public void setNomeArquivos(String nomeArquivoClientes, String nomeArquivoRobos, String nomeArquivoLocacoes) {
+        this.nomeArquivoClientes = nomeArquivoClientes;
+        this.nomeArquivoRobos = nomeArquivoRobos;
+        this.nomeArquivoLocacoes = nomeArquivoLocacoes;
+    }
+
+    private void carregarClientes() throws IOException {
+        List<String> linhas = Files.readAllLines(Paths.get(nomeArquivoClientes));
+        for (String linha : linhas) {
+            String[] dados = linha.split(",");
+            int codigo = Integer.parseInt(dados[0]);
+            String nome = dados[1];
+            String tipo = dados[2];
+            if (tipo.equals("Individual")) {
+                String cpf = dados[3];
+                clientes.add(new Individual(codigo, nome, cpf));
+            } else {
+                int ano = Integer.parseInt(dados[3]);
+                clientes.add(new Empresarial(codigo, nome, ano));
+            }
+        }
+    }
+
+    private void carregarRobos() throws IOException {
+        List<String> linhas = Files.readAllLines(Paths.get(nomeArquivoRobos));
+        for (String linha : linhas) {
+            String[] dados = linha.split(",");
+            int id = Integer.parseInt(dados[0]);
+            String modelo = dados[1];
+            double valorDiario = Double.parseDouble(dados[2]);
+            int tipo = Integer.parseInt(dados[3]);
+            switch (tipo) {
+                case 1:
+                    int nivel = Integer.parseInt(dados[4]);
+                    robos.add(new Domestico(id, modelo, valorDiario, nivel));
+                    break;
+                case 2:
+                    String setor = dados[4];
+                    robos.add(new Industrial(id, modelo, valorDiario, setor));
+                    break;
+                case 3:
+                    double area = Double.parseDouble(dados[4]);
+                    String uso = dados[5];
+                    robos.add(new Agricola(id, modelo, valorDiario, area, uso));
+                    break;
+            }
+        }
+    }
+
+    private void carregarLocacoes() throws IOException, ParseException {
+        List<String> linhas = Files.readAllLines(Paths.get(nomeArquivoLocacoes));
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        for (String linha : linhas) {
+            String[] dados = linha.split(",");
+            int numero = Integer.parseInt(dados[0]);
+            Date dataInicio = sdf.parse(dados[1]);
+            Date dataFim = sdf.parse(dados[2]);
+            int codigoCliente = Integer.parseInt(dados[3]);
+            Cliente cliente = clientes.stream().filter(c -> c.getCodigo() == codigoCliente).findFirst().orElse(null);
+            if (cliente != null) {
+                List<Robo> robosLocados = new ArrayList<>();
+                for (int i = 4; i < dados.length; i++) {
+                    int idRobo = Integer.parseInt(dados[i]);
+                    Robo robo = robos.stream().filter(r -> r.getId() == idRobo).findFirst().orElse(null);
+                    if (robo != null) {
+                        robosLocados.add(robo);
+                    }
+                }
+                Locacao locacao = new Locacao(numero, Status.CADASTRADA, dataInicio, dataFim, cliente, robosLocados);
+                locacoes.add(locacao);
+                locacoesPendentes.add(locacao);
+            }
+        }
+    }
+
+    private void salvarClientes(String nomeArquivo) throws IOException {
+        BufferedWriter writer = Files.newBufferedWriter(Paths.get(nomeArquivo));
+        for (Cliente cliente : clientes) {
+            writer.write(cliente.toCSV());
+            writer.newLine();
+        }
+        writer.close();
+    }
+
+    private void salvarRobos(String nomeArquivo) throws IOException {
+        BufferedWriter writer = Files.newBufferedWriter(Paths.get(nomeArquivo));
+        for (Robo robo : robos) {
+            writer.write(robo.toCSV());
+            writer.newLine();
+        }
+        writer.close();
+    }
+
+    private void salvarLocacoes(String nomeArquivo) throws IOException {
+        BufferedWriter writer = Files.newBufferedWriter(Paths.get(nomeArquivo));
+        for (Locacao locacao : locacoes) {
+            writer.write(locacao.toCSV());
+            writer.newLine();
+        }
+        writer.close();
     }
 
     public void finalizarSistema() {
         System.out.println("Sistema finalizado.");
         System.exit(0);
-    }
-
-    public List<Cliente> getClientes() {
-
-        return null;
-    }
-
-    public List<Robo> getRobos() {
-        return null;
-    }
-
-    public void realizarCargaDeDadosIniciais() {
-    }
-
-    public void salvarDados() {
     }
 }

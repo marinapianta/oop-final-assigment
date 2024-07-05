@@ -1,6 +1,6 @@
 package src.dados;
 
-public class Domestico extends Robo{
+public class Domestico extends Robo {
     private int nivel;
 
     public Domestico(int id, String modelo, double valorDiario, int nivel) {
@@ -10,10 +10,6 @@ public class Domestico extends Robo{
 
     public int getNivel() {
         return nivel;
-    }
-
-    public void setNivel(int nivel) {
-        this.nivel = nivel;
     }
 
     @Override
@@ -36,9 +32,12 @@ public class Domestico extends Robo{
     }
 
     @Override
+    public String toCSV() {
+        return getId() + "," + getModelo() + "," + getValorDiario() + ",1," + nivel;
+    }
+
+    @Override
     public String toString() {
-        return "Domestico{" +
-                "nivel=" + nivel +
-                "} " + super.toString();
+        return super.toString() + "\nTipo: Domestico \n" + "Nivel: " + nivel;
     }
 }

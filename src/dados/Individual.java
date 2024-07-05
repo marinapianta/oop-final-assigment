@@ -23,10 +23,12 @@ public class Individual extends Cliente {
         return 0.0;
     }
 
+    public String toCSV() {
+        return getCodigo() + "," + getNome() + ",Individual," + cpf;
+    }
+
     @Override
     public String toString() {
-        return "Individual{" +
-                "cpf='" + cpf + '\'' +
-                "} " + super.toString();
+        return super.toString() + "\nTipo: Individual \n" + "CPF: " + cpf;
     }
 }

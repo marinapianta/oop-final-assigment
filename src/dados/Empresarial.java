@@ -25,10 +25,13 @@ public class Empresarial extends Cliente {
         }
         return 0.0;
     }
+
+    public String toCSV() {
+        return getCodigo() + "," + getNome() + ",Empresarial," + ano;
+    }
+
     @Override
     public String toString() {
-        return "Empresarial{" +
-                "ano=" + ano +
-                "} " + super.toString();
+        return super.toString() + "\nTipo: Empresarial \n" + "Ano: " + ano;
     }
 }

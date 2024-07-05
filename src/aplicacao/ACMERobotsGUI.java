@@ -5,12 +5,15 @@ import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import src.dados.*;
 import java.util.List;
-import java.util.ArrayList;
+import java.io.IOException;
+
+import src.dados.*;
 
 public class ACMERobotsGUI extends JFrame {
     private ACMERobots acmeRobots;
+    private JTextArea outputArea;
+    private JComboBox<String> fileFormatComboBox;
 
     public ACMERobotsGUI() {
         acmeRobots = new ACMERobots();
@@ -20,7 +23,7 @@ public class ACMERobotsGUI extends JFrame {
         setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel(new GridLayout(10, 1));
-        add(mainPanel);
+        add(mainPanel, BorderLayout.NORTH);
 
         JButton btnCadastrarRobo = new JButton("Cadastrar Novo Robô");
         JButton btnCadastrarCliente = new JButton("Cadastrar Novo Cliente");
@@ -44,6 +47,11 @@ public class ACMERobotsGUI extends JFrame {
         mainPanel.add(btnSalvarDados);
         mainPanel.add(btnFinalizarSistema);
 
+        // ComboBox for file format selection
+        fileFormatComboBox = new JComboBox<>(new String[]{"CSV"});
+        mainPanel.add(new JLabel("Formato de Arquivo:"));
+        mainPanel.add(fileFormatComboBox);
+
         // Action Listeners for each button
         btnCadastrarRobo.addActionListener(e -> cadastrarRobo());
         btnCadastrarCliente.addActionListener(e -> cadastrarCliente());
@@ -55,6 +63,12 @@ public class ACMERobotsGUI extends JFrame {
         btnCargaDados.addActionListener(e -> realizarCargaDeDadosIniciais());
         btnSalvarDados.addActionListener(e -> salvarDados());
         btnFinalizarSistema.addActionListener(e -> finalizarSistema());
+
+        // Create the output area
+        outputArea = new JTextArea(10, 30);
+        outputArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(outputArea);
+        add(scrollPane, BorderLayout.CENTER);
 
         setVisible(true);
     }
@@ -71,33 +85,45 @@ public class ACMERobotsGUI extends JFrame {
                 "ID:", idField,
                 "Modelo:", modeloField,
                 "Valor Diário:", valorDiarioField,
-                "Tipo (Agricola, Domestico, Industrial):", tipoField,
-                "Atributo (nível, setor, área):", atributoField,
+                "Tipo (1 - Domestico, 2 - Industrial, 3 - Agricola):", tipoField,
+                "Atributo (nível para Domestico, setor para Industrial, área para Agricola):", atributoField,
                 "Uso (apenas para Agricola):", usoField
         };
 
         int option = JOptionPane.showConfirmDialog(null, fields, "Cadastrar Robô", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            int id = Integer.parseInt(idField.getText());
-            String modelo = modeloField.getText();
-            double valorDiario = Double.parseDouble(valorDiarioField.getText());
-            String tipo = tipoField.getText();
-            String atributo = atributoField.getText();
-            String uso = usoField.getText();
+            try {
+                int id = Integer.parseInt(idField.getText());
+                String modelo = modeloField.getText();
+                double valorDiario = Double.parseDouble(valorDiarioField.getText());
+                int tipo = Integer.parseInt(tipoField.getText());
+                String atributo = atributoField.getText();
+                String uso = usoField.getText();
 
-            Robo robo;
-            if (tipo.equalsIgnoreCase("Agricola")) {
-                robo = new Agricola(id, modelo, valorDiario, Double.parseDouble(atributo), uso);
-            } else if (tipo.equalsIgnoreCase("Domestico")) {
-                robo = new Domestico(id, modelo, valorDiario, Integer.parseInt(atributo));
-            } else if (tipo.equalsIgnoreCase("Industrial")) {
-                robo = new Industrial(id, modelo, valorDiario, atributo);
-            } else {
-                JOptionPane.showMessageDialog(this, "Tipo de robô inválido!");
-                return;
+                Robo robo;
+                switch (tipo) {
+                    case 1: // Domestico
+                        int nivel = Integer.parseInt(atributo);
+                        robo = new Domestico(id, modelo, valorDiario, nivel);
+                        break;
+                    case 2: // Industrial
+                        String setor = atributo;
+                        robo = new Industrial(id, modelo, valorDiario, setor);
+                        break;
+                    case 3: // Agricola
+                        double area = Double.parseDouble(atributo);
+                        robo = new Agricola(id, modelo, valorDiario, area, uso);
+                        break;
+                    default:
+                        JOptionPane.showMessageDialog(this, "Tipo de robô inválido!");
+                        return;
+                }
+
+                acmeRobots.cadastrarRobo(robo);
+                appendOutput("Robô cadastrado com sucesso.");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Formato de número inválido!");
             }
-
-            acmeRobots.cadastrarRobo(robo);
         }
     }
 
@@ -116,22 +142,28 @@ public class ACMERobotsGUI extends JFrame {
 
         int option = JOptionPane.showConfirmDialog(null, fields, "Cadastrar Cliente", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            int codigo = Integer.parseInt(codigoField.getText());
-            String nome = nomeField.getText();
-            int tipo = Integer.parseInt(tipoField.getText());
-            String atributo = atributoField.getText();
+            try {
+                int codigo = Integer.parseInt(codigoField.getText());
+                String nome = nomeField.getText();
+                int tipo = Integer.parseInt(tipoField.getText());
+                String atributo = atributoField.getText();
 
-            Cliente cliente;
-            if (tipo == 1) {
-                cliente = new Individual(codigo, nome, atributo);
-            } else if (tipo == 2) {
-                cliente = new Empresarial(codigo, nome, Integer.parseInt(atributo));
-            } else {
-                JOptionPane.showMessageDialog(this, "Tipo de cliente inválido!");
-                return;
+                Cliente cliente;
+                if (tipo == 1) {
+                    cliente = new Individual(codigo, nome, atributo);
+                } else if (tipo == 2) {
+                    int ano = Integer.parseInt(atributo);
+                    cliente = new Empresarial(codigo, nome, ano);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Tipo de cliente inválido!");
+                    return;
+                }
+
+                acmeRobots.cadastrarCliente(cliente);
+                appendOutput("Cliente cadastrado com sucesso.");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Formato de número inválido!");
             }
-
-            acmeRobots.cadastrarCliente(cliente);
         }
     }
 
@@ -162,50 +194,54 @@ public class ACMERobotsGUI extends JFrame {
 
         int option = JOptionPane.showConfirmDialog(null, fields, "Cadastrar Locação", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            int numero = Integer.parseInt(numeroField.getText());
-            String dataInicio = dataInicioField.getText();
-            String dataFim = dataFimField.getText();
-
-            List<Robo> robos = acmeRobots.getRobos();
-            String[] roboOptions = robos.stream().map(r -> r.getModelo() + " (ID: " + r.getId() + ")").toArray(String[]::new);
-            JList<String> roboList = new JList<>(roboOptions);
-            roboList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-
-            JOptionPane.showMessageDialog(this, new JScrollPane(roboList), "Selecione os Robôs", JOptionPane.PLAIN_MESSAGE);
-            List<String> selectedRobos = roboList.getSelectedValuesList();
-            if (selectedRobos.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Nenhum robô selecionado!");
-                return;
-            }
-
-            List<Robo> osRobos = new ArrayList<>();
-            for (String selectedRobo : selectedRobos) {
-                int roboId = Integer.parseInt(selectedRobo.substring(selectedRobo.indexOf("ID: ") + 4, selectedRobo.indexOf(")")));
-                Robo robo = robos.stream().filter(r -> r.getId() == roboId).findFirst().orElse(null);
-                if (robo != null) {
-                    osRobos.add(robo);
-                }
-            }
-
             try {
+                int numero = Integer.parseInt(numeroField.getText());
+                String dataInicio = dataInicioField.getText();
+                String dataFim = dataFimField.getText();
+
+                List<Robo> robos = acmeRobots.getRobos();
+                String[] roboOptions = robos.stream().map(r -> r.getModelo() + " (ID: " + r.getId() + ")").toArray(String[]::new);
+                JList<String> roboList = new JList<>(roboOptions);
+                roboList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+
+                JOptionPane.showMessageDialog(this, new JScrollPane(roboList), "Selecione os Robôs", JOptionPane.PLAIN_MESSAGE);
+                List<String> selectedRobos = roboList.getSelectedValuesList();
+                if (selectedRobos.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Nenhum robô selecionado!");
+                    return;
+                }
+
+                List<Robo> osRobos = new ArrayList<>();
+                for (String selectedRobo : selectedRobos) {
+                    int roboId = Integer.parseInt(selectedRobo.substring(selectedRobo.indexOf("ID: ") + 4, selectedRobo.indexOf(")")));
+                    Robo robo = robos.stream().filter(r -> r.getId() == roboId).findFirst().orElse(null);
+                    if (robo != null) {
+                        osRobos.add(robo);
+                    }
+                }
+
                 Locacao locacao = new Locacao(numero, Status.CADASTRADA, new SimpleDateFormat("dd/MM/yyyy").parse(dataInicio), new SimpleDateFormat("dd/MM/yyyy").parse(dataFim), cliente, osRobos);
                 acmeRobots.cadastrarLocacao(locacao);
-            } catch (ParseException e) {
-                JOptionPane.showMessageDialog(this, "Formato de data inválido!");
+                appendOutput("Locação cadastrada com sucesso.");
+            } catch (IllegalArgumentException | ParseException ex) {
+                JOptionPane.showMessageDialog(this, "Formato de número ou data inválido!");
             }
         }
     }
 
     private void processarLocacoes() {
         acmeRobots.processarLocacoes();
+        appendOutput("Locações processadas.");
     }
 
     private void mostrarRelatorioGeral() {
-        acmeRobots.mostrarRelatorioGeral();
+        String relatorio = acmeRobots.mostrarRelatorioGeral();
+        appendOutput(relatorio);
     }
 
     private void consultarLocacoes() {
-        acmeRobots.consultarLocacoes();
+        String locacoes = acmeRobots.consultarLocacoes();
+        appendOutput(locacoes);
     }
 
     private void alterarSituacaoLocacao() {
@@ -214,28 +250,57 @@ public class ACMERobotsGUI extends JFrame {
 
         Object[] fields = {
                 "Número da Locação:", numeroField,
-                "Nova Situação (CADASTRADA, PROCESSANDO, CONCLUIDA):", situacaoField
+                "Nova Situação (CADASTRADA, EXECUTANDO, FINALIZADA):", situacaoField
         };
 
         int option = JOptionPane.showConfirmDialog(null, fields, "Alterar Situação de Locação", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            int numero = Integer.parseInt(numeroField.getText());
-            String situacao = situacaoField.getText();
+            try {
+                int numero = Integer.parseInt(numeroField.getText());
+                String situacao = situacaoField.getText();
 
-            acmeRobots.alterarSituacaoLocacao(numero, Status.valueOf(situacao));
+                acmeRobots.alterarSituacaoLocacao(numero, situacao);
+                appendOutput("Situação da locação alterada para " + situacao + ".");
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(this, "Formato de número ou situação inválido!");
+            }
         }
     }
 
     private void realizarCargaDeDadosIniciais() {
-        acmeRobots.realizarCargaDeDadosIniciais();
+        String nomeArquivo = JOptionPane.showInputDialog("Informe o nome base dos arquivos de dados (sem extensão):");
+
+        String formato = (String) fileFormatComboBox.getSelectedItem();
+        if ("CSV".equals(formato)) {
+            acmeRobots.setNomeArquivos(nomeArquivo + "-CLIENTES.CSV", nomeArquivo + "-ROBOS.CSV", nomeArquivo + "-LOCACOES.CSV");
+            acmeRobots.realizarCargaDeDadosIniciais();
+            outputArea.setText(acmeRobots.mostrarRelatorioGeral());
+        } else {
+            JOptionPane.showMessageDialog(this, "Formato de arquivo inválido!");
+        }
     }
 
     private void salvarDados() {
-        acmeRobots.salvarDados();
+        String nomeArquivo = JOptionPane.showInputDialog("Informe o nome base dos arquivos de dados (sem extensão):");
+
+        String formato = (String) fileFormatComboBox.getSelectedItem();
+        if ("CSV".equals(formato)) {
+            acmeRobots.setNomeArquivos(nomeArquivo + "-CLIENTES.CSV", nomeArquivo + "-ROBOS.CSV", nomeArquivo + "-LOCACOES.CSV");
+            acmeRobots.salvarDados();
+            appendOutput("Dados salvos com sucesso.");
+        } else {
+            JOptionPane.showMessageDialog(this, "Formato de arquivo inválido!");
+        }
     }
 
     private void finalizarSistema() {
         acmeRobots.finalizarSistema();
+        appendOutput("Sistema finalizado.");
+    }
+
+    private void appendOutput(String message) {
+        outputArea.append(message + "\n");
+        outputArea.setCaretPosition(outputArea.getDocument().getLength());
     }
 
     public static void main(String[] args) {
