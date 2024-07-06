@@ -7,5 +7,16 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES />
+        <JAVADOC>
+          <root url="jar://$MODULE_DIR$/libs/jackson-annotations-2.15.0-javadoc.jar!/" />
+          <root url="jar://$MODULE_DIR$/libs/jackson-core-2.15.0-javadoc.jar!/" />
+          <root url="jar://$MODULE_DIR$/libs/jackson-databind-2.15.0-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

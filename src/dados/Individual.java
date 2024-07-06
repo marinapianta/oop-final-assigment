@@ -8,14 +8,6 @@ public class Individual extends Cliente {
         this.cpf = cpf;
     }
 
-    public String getCpf() {
-        return cpf;
-    }
-
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
-    }
-
     public double calculaDesconto(int qtdRobos) {
         if (qtdRobos > 1) {
             return 0.05;

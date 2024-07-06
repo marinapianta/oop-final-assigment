@@ -1,19 +1,17 @@
 package src.aplicacao;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
-import java.io.IOException;
-
 import src.dados.*;
 
 public class ACMERobotsGUI extends JFrame {
     private ACMERobots acmeRobots;
     private JTextArea outputArea;
-    private JComboBox<String> fileFormatComboBox;
 
     public ACMERobotsGUI() {
         acmeRobots = new ACMERobots();
@@ -21,59 +19,125 @@ public class ACMERobotsGUI extends JFrame {
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-
-        JPanel mainPanel = new JPanel(new GridLayout(10, 1));
-        add(mainPanel, BorderLayout.NORTH);
-
-        JButton btnCadastrarRobo = new JButton("Cadastrar Novo Robô");
-        JButton btnCadastrarCliente = new JButton("Cadastrar Novo Cliente");
-        JButton btnCadastrarLocacao = new JButton("Cadastrar Nova Locação");
-        JButton btnProcessarLocacoes = new JButton("Processar Locações");
-        JButton btnMostrarRelatorio = new JButton("Mostrar Relatório Geral");
-        JButton btnConsultarLocacoes = new JButton("Consultar Todas as Locações");
-        JButton btnAlterarSituacao = new JButton("Alterar Situação de Locação");
-        JButton btnCargaDados = new JButton("Realizar Carga de Dados Iniciais");
-        JButton btnSalvarDados = new JButton("Salvar Dados");
-        JButton btnFinalizarSistema = new JButton("Finalizar Sistema");
-
-        mainPanel.add(btnCadastrarRobo);
-        mainPanel.add(btnCadastrarCliente);
-        mainPanel.add(btnCadastrarLocacao);
-        mainPanel.add(btnProcessarLocacoes);
-        mainPanel.add(btnMostrarRelatorio);
-        mainPanel.add(btnConsultarLocacoes);
-        mainPanel.add(btnAlterarSituacao);
-        mainPanel.add(btnCargaDados);
-        mainPanel.add(btnSalvarDados);
-        mainPanel.add(btnFinalizarSistema);
-
-        // ComboBox for file format selection
-        fileFormatComboBox = new JComboBox<>(new String[]{"CSV"});
-        mainPanel.add(new JLabel("Formato de Arquivo:"));
-        mainPanel.add(fileFormatComboBox);
-
-        // Action Listeners for each button
-        btnCadastrarRobo.addActionListener(e -> cadastrarRobo());
-        btnCadastrarCliente.addActionListener(e -> cadastrarCliente());
-        btnCadastrarLocacao.addActionListener(e -> cadastrarLocacao());
-        btnProcessarLocacoes.addActionListener(e -> processarLocacoes());
-        btnMostrarRelatorio.addActionListener(e -> mostrarRelatorioGeral());
-        btnConsultarLocacoes.addActionListener(e -> consultarLocacoes());
-        btnAlterarSituacao.addActionListener(e -> alterarSituacaoLocacao());
-        btnCargaDados.addActionListener(e -> realizarCargaDeDadosIniciais());
-        btnSalvarDados.addActionListener(e -> salvarDados());
-        btnFinalizarSistema.addActionListener(e -> finalizarSistema());
-
-        // Create the output area
-        outputArea = new JTextArea(10, 30);
-        outputArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(outputArea);
-        add(scrollPane, BorderLayout.CENTER);
-
+        setIconImage(Toolkit.getDefaultToolkit().getImage("robo-icon.png"));
+        initComponents();
         setVisible(true);
     }
 
+    private void initComponents() {
+        JPanel mainPanel = createMainPanel();
+        add(mainPanel);
+
+        JPanel buttonPanel = createButtonPanel();
+        mainPanel.add(buttonPanel, BorderLayout.NORTH);
+
+        JScrollPane scrollPane = createOutputArea();
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private JPanel createMainPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        mainPanel.setBackground(new Color(230, 230, 250));
+        return mainPanel;
+    }
+
+    private JPanel createButtonPanel() {
+        JPanel buttonPanel = new JPanel(new GridLayout(5, 2, 10, 10));
+        buttonPanel.setBackground(new Color(230, 230, 250));
+
+        JButton[] buttons = {
+                createButton("Cadastrar Novo Robô"),
+                createButton("Cadastrar Novo Cliente"),
+                createButton("Cadastrar Nova Locação"),
+                createButton("Processar Locações"),
+                createButton("Mostrar Relatório Geral"),
+                createButton("Consultar Todas as Locações"),
+                createButton("Alterar Situação de Locação"),
+                createButton("Realizar Carga de Dados Iniciais"),
+                createButton("Salvar Dados"),
+                createButton("Finalizar Sistema")
+        };
+
+        for (JButton button : buttons) {
+            buttonPanel.add(button);
+        }
+
+        buttons[0].addActionListener(e -> cadastrarRobo());
+        buttons[1].addActionListener(e -> cadastrarCliente());
+        buttons[2].addActionListener(e -> cadastrarLocacao());
+        buttons[3].addActionListener(e -> processarLocacoes());
+        buttons[4].addActionListener(e -> mostrarRelatorioGeral());
+        buttons[5].addActionListener(e -> consultarLocacoes());
+        buttons[6].addActionListener(e -> alterarSituacaoLocacao());
+        buttons[7].addActionListener(e -> realizarCargaDeDadosIniciais());
+        buttons[8].addActionListener(e -> salvarDados());
+        buttons[9].addActionListener(e -> finalizarSistema());
+
+        return buttonPanel;
+    }
+
+    private JScrollPane createOutputArea() {
+        outputArea = new JTextArea(5, 30);
+        outputArea.setEditable(false);
+        outputArea.setBackground(new Color(240, 255, 255));
+        outputArea.setForeground(new Color(0, 0, 0));
+        outputArea.setFont(new Font("Helvetica", Font.PLAIN, 14));
+        outputArea.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.GRAY),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+        JScrollPane scrollPane = new JScrollPane(outputArea);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        return scrollPane;
+    }
+
+    private JButton createButton(String text) {
+        JButton button = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                if (getModel().isArmed()) {
+                    g.setColor(new Color(255, 192, 203));
+                } else if (getModel().isRollover()) {
+                    g.setColor(new Color(255, 192, 203));
+                } else {
+                    g.setColor(new Color(147, 112, 219));
+                }
+                g.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
+                super.paintComponent(g);
+            }
+
+            @Override
+            protected void paintBorder(Graphics g) {
+                g.setColor(new Color(123, 104, 238));
+                g.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 15, 15);
+            }
+        };
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setFont(new Font("Helvetica", Font.BOLD, 14));
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.setContentAreaFilled(false);
+        button.setOpaque(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        return button;
+    }
+
+    private void setDialogColors() {
+        UIManager.put("OptionPane.background", new Color(230, 230, 250));
+        UIManager.put("Panel.background", new Color(230, 230, 250));
+        UIManager.put("Button.background", new Color(147, 112, 219));
+        UIManager.put("Button.foreground", Color.WHITE);
+        UIManager.put("Label.foreground", Color.BLACK);
+        UIManager.put("TextField.background", new Color(255, 255, 255));
+        UIManager.put("TextField.foreground", Color.BLACK);
+        UIManager.put("ComboBox.background", new Color(255, 255, 255));
+        UIManager.put("ComboBox.foreground", Color.BLACK);
+    }
+
     private void cadastrarRobo() {
+        setDialogColors();
         JTextField idField = new JTextField();
         JTextField modeloField = new JTextField();
         JTextField valorDiarioField = new JTextField();
@@ -128,6 +192,7 @@ public class ACMERobotsGUI extends JFrame {
     }
 
     private void cadastrarCliente() {
+        setDialogColors();
         JTextField codigoField = new JTextField();
         JTextField nomeField = new JTextField();
         JTextField tipoField = new JTextField();
@@ -168,6 +233,7 @@ public class ACMERobotsGUI extends JFrame {
     }
 
     private void cadastrarLocacao() {
+        setDialogColors();
         List<Cliente> clientes = acmeRobots.getClientes();
         if (clientes.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Não há clientes cadastrados!");
@@ -245,6 +311,7 @@ public class ACMERobotsGUI extends JFrame {
     }
 
     private void alterarSituacaoLocacao() {
+        setDialogColors();
         JTextField numeroField = new JTextField();
         JTextField situacaoField = new JTextField();
 
@@ -268,29 +335,21 @@ public class ACMERobotsGUI extends JFrame {
     }
 
     private void realizarCargaDeDadosIniciais() {
+        setDialogColors();
         String nomeArquivo = JOptionPane.showInputDialog("Informe o nome base dos arquivos de dados (sem extensão):");
 
-        String formato = (String) fileFormatComboBox.getSelectedItem();
-        if ("CSV".equals(formato)) {
-            acmeRobots.setNomeArquivos(nomeArquivo + "-CLIENTES.CSV", nomeArquivo + "-ROBOS.CSV", nomeArquivo + "-LOCACOES.CSV");
-            acmeRobots.realizarCargaDeDadosIniciais();
-            outputArea.setText(acmeRobots.mostrarRelatorioGeral());
-        } else {
-            JOptionPane.showMessageDialog(this, "Formato de arquivo inválido!");
-        }
+        acmeRobots.setNomeArquivos(nomeArquivo + "-CLIENTES.CSV", nomeArquivo + "-ROBOS.CSV", nomeArquivo + "-LOCACOES.CSV");
+        acmeRobots.realizarCargaDeDadosIniciais();
+        outputArea.setText(acmeRobots.mostrarRelatorioGeral());
     }
 
     private void salvarDados() {
+        setDialogColors();
         String nomeArquivo = JOptionPane.showInputDialog("Informe o nome base dos arquivos de dados (sem extensão):");
 
-        String formato = (String) fileFormatComboBox.getSelectedItem();
-        if ("CSV".equals(formato)) {
-            acmeRobots.setNomeArquivos(nomeArquivo + "-CLIENTES.CSV", nomeArquivo + "-ROBOS.CSV", nomeArquivo + "-LOCACOES.CSV");
-            acmeRobots.salvarDados();
-            appendOutput("Dados salvos com sucesso.");
-        } else {
-            JOptionPane.showMessageDialog(this, "Formato de arquivo inválido!");
-        }
+        acmeRobots.setNomeArquivos(nomeArquivo + "-CLIENTES.CSV", nomeArquivo + "-ROBOS.CSV", nomeArquivo + "-LOCACOES.CSV");
+        acmeRobots.salvarDados();
+        appendOutput("Dados salvos com sucesso.");
     }
 
     private void finalizarSistema() {
@@ -303,7 +362,4 @@ public class ACMERobotsGUI extends JFrame {
         outputArea.setCaretPosition(outputArea.getDocument().getLength());
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(ACMERobotsGUI::new);
-    }
 }

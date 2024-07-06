@@ -39,14 +39,6 @@ public class Locacao {
         this.situacao = situacao;
     }
 
-    public Date getDataInicio() {
-        return dataInicio;
-    }
-
-    public Date getDataFim() {
-        return dataFim;
-    }
-
     public List<Robo> getRobos() {
         return robos;
     }
@@ -60,7 +52,7 @@ public class Locacao {
         return TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
     }
 
-    public static String formatDate(Date date) {
+    public String formatDate(Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         return sdf.format(date);
     }
